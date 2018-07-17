@@ -1,0 +1,55 @@
+[
+	{
+		"name":"Suluh Damar Grahita",
+		"price":14110110123,
+		"image":"pic1.jpg",
+		"seller":{
+			"name": "Dasana Indah",
+			"location":"Tangerang"
+		}
+
+	},
+
+	{
+		"name":"Alvyn Lianto",
+		"price":14110110129,
+		"image":"pic2.jpg",
+		"seller": {
+			"name":"Poris",
+			"location":"Tangerang"
+		}
+	},
+
+	{
+		"name":"Fariz Septian Alam",
+		"price":14110110133,
+		"image":"pic3.jpg",
+		"seller": {
+			"name":"Graha Bunga",
+			"location":"Tangerang"
+		}
+	},
+
+	{
+		"name":"Ghazian Fadhli Fakhrusy",
+		"price":14110110144,
+		"image":"pic4.jpg",
+		"seller": {
+			"name":"Gading Serpong",
+			"location":"Di Teras"
+		}
+	},
+
+	{
+		"name":"Oktavianus Terry Sartono",
+		"price":14110110146,
+		"image":"pic5.jpg",
+		"seller": {
+			"name":"The Bunker Cafe",
+			"location":"Gading Serpong"
+		}
+	}
+
+
+
+]

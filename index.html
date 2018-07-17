@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Project PTI (BattleShip)</title>
+	  <link href="style.css" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Special+Elite" rel="stylesheet">
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+</head>
+<body>
+
+	<div class="col-md-12" style="text-align:center">
+		<img src="asset/boatGame2.png">
+	</div>
+
+	<div class="container-fluid child">
+		<div class="row">
+		<div class="col-md-12">
+
+
+		<button class="btn btn-default btnAll" name="btnMain" id="btnMain">
+			<i class="fa fa-play" aria-hidden="true"></i>Main
+		</button>
+
+		<button class="btn btn-danger btnAll" id="btnExit">
+			Exit
+		</button>
+
+		<button class="btn btn-primary btnAll" id="btnTutorial">
+			Tutorial			
+		</button>
+
+		<button class="btn btn-info btnAll" id="btnAboutUS">
+			About US
+		</button>
+		<button class="btn btn-info btnAll" id="btnHiScore">
+				High Score
+			</button>
+
+	<div>
+			
+		</div>
+	</div>
+	
+
+
+		<script>
+
+			let btnMain = $("#btnMain");
+			let btnExit = $("#btnExit");
+			let btnTutorial = $('#btnTutorial');
+			let btnAboutUS = $('#btnAboutUS');
+			let btnHScore = $("#btnHiScore");
+			let userName = null;
+
+			var windowObjectReference;
+			var strWindowFeatures = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
+
+			btnMain.click(function () {
+				swal("Write your name first !", {
+				  content: "input",
+				})
+				.then((value) => {
+				  swal(`Welcome, ${value} let's play`, {buttons : "Let's Go!"}).then((val) => {
+						localStorage.setItem("Name", value);
+						window.location = "main.html";
+					})  
+				});
+
+
+
+			})
+
+		btnExit.click(function(){
+				//var AwwYiss = window.location.href("https://www.google.com");
+				//swal("Are you sure you want to do this?", {
+				 // buttons: ["Oh noez!", true , 
+				 // 			catch: window.location = href("https://www.google.com")],
+				//});
+
+				swal("Do you want to exit the game ?", {
+					  buttons: {
+					    cancel: "Aww Noehh!",
+					    
+					    catch: {
+					      text: "Aww Yiss!",
+								value: "exit",
+								
+					    },
+					    
+					  },
+					})
+					.then((value) => {
+					  switch (value) {
+	
+					 
+					    case "exit":
+							window.location = "https://www.google.com/";
+					      break;
+					 
+					    default:
+					      swal("Let's PLay Again !");
+					  }
+					});
+			})
+
+
+		btnTutorial.click(function(){
+			window.location = ("tutorial.html");
+		})
+
+		btnAboutUS.click(function(){
+			window.location = ("aboutUS.html");
+		})
+
+		btnHScore.click(function(){
+			window.location.href = "hscore.html";
+		});
+		</script>
+</body>
+</html>

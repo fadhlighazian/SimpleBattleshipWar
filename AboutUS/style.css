@@ -1,0 +1,73 @@
+body{
+padding: 20px;
+}
+
+.card-container{
+	width:100%;
+	padding-top: 80px;
+	padding-left:12px;
+	padding-right:12px;
+}
+
+.card {
+	background-color: rgba(0,0,0,0.1);
+	padding:24px;
+	margin: 5px;
+	width:20%;
+	float:left;
+	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+	transition: 0.3s;
+	border-radius: 10px; 
+	height:450px;
+}
+
+.card img{
+	width:100%;
+	height:255px;
+	width: 255px;
+	
+}
+.card:hover {
+	box-shadow: 0 8px 16px 0 rgba(255,0,0,0.2);
+}
+
+.container{
+	padding: 2px 16px;
+}
+
+
+input[type=text]:focus {
+	width: 40%;
+}
+
+input [type=text]{
+	width: 130px;
+	box-sizing: border-box;
+	border: 2px solid #ccc;
+	border-radius: 4px;
+	font-size: 16px;
+	background-color: white;
+	background-image: url('images/search.png');
+	background-size: 21px 21px;
+	background-position: 10px 10px;
+	background-repeat: no-repeat;
+	padding: 12px 20px 12px 40px;
+	-webkit-transition : width 0.4s ease-in-out;
+	transition: width 0.4s ease-in-out;
+}
+
+input[type=checkbox] {
+	width: 24px;
+	height: 24px;
+	position: relative;	
+	top: 6px;
+	padding: 0px;
+	margin: 0px;
+	overflow: visible;
+}
+
+label{
+	font-family: Verdana;
+	font-size: 16px;
+}
+

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Project PTI (BattleShip)</title>
+		<link rel="stylesheet" type="text/css" href="style.css">
+		
+		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>	
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
+		
+		<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-3">
+
+				</div>
+
+				<div class="col-md-6">
+					<div style="display: table; margin:auto;">
+						<table id="homeTable" border="1">
+						
+						</table>
+						
+						<table id="enemyTable" border="1">
+							
+						</table>
+
+						
+						<div id="listOfCheckbox" class="col-md-12" style="padding: 25px;">
+							<div class="row">	
+								<div class="col-md-2">
+									<input class="chbShip1" type="checkbox" value="ship1"><p class="txtShip">Ship 1</p>
+								</div>
+								<div class="col-md-2">
+									<input class="chbShip2" type="checkbox" value="ship2" disabled="true"><p class="txtShip">Ship 2</p>
+								</div>
+								<div class="col-md-2">
+									<input class="chbShip3" type="checkbox" value="ship3" disabled="true"><p class="txtShip">Ship 3</p>
+								</div>
+								<div class="col-md-2">
+									<input class="chbShip4" type="checkbox" value="ship4" disabled="true"><p class="txtShip">Ship 4</p>
+								</div>
+								<div class="col-md-2">
+									<input class="chbShip5" type="checkbox" value="ship5" disabled="true" ><p class="txtShip">Ship 5</p>
+								</div>
+								<div class="col-md-2">
+									<button id="btnTryToDestroy" disabled="true" class="btn btn-primary">Destroy The Enemy </button>
+								</div>
+							</div>
+						</div>
+					
+					</div>
+				</div>
+
+				<div class="col-md-3">
+
+				</div>
+
+			</div>
+		</div>
+		
+
+	<script>
+
+		// Global Variable -> Semua Function dapat Mengaksesnya
+
+		//ini adalah flag
+		let userTryToDestroy 	 = false;
+		let userOnPlaceBoat 	 = false;
+
+		let minutes;
+		let seconds;
+		let t;
+		
+		let userColNumMatchComputerColNum = 0; 
+		let computerColNumMatchUserColNum = 0;
+
+		let duration = 0;
+		let numOfUserAttempToDestroyComputer = 0;
+		let numOfComputerAttempToDestroyUser = 0;
+
+		let arrayOfUserColumn = [];         //placeboat yg dipilih sama User
+		let arrayOfComputerColumn = [];     //placeboat yg dipilih sama Komputer
+		let arrayOfComputerAttempNum = [];  
+
+		let arrayOfUserAttempToDestroyComputerColNum = [];
+		let arrayOfComputerAttempToDestroyUserColNum = [];
+
+
+		let homeTable  = $("#homeTable");
+		let enemyTable = $("#enemyTable");
+
+		let listOfCheckbox = $("#listOfCheckbox");
+		let chbShip1 = $(".chbShip1");
+		let chbShip2 = $(".chbShip2");
+		let chbShip3 = $(".chbShip3");
+		let chbShip4 = $(".chbShip4");
+		let chbShip5 = $(".chbShip5");
+
+		let btnTryToDestroyComputer = $("#btnTryToDestroy");
+
+		var audioBomb   = new Audio("asset/bomb.mp3");
+		var audioSplash = new Audio("asset/Water.mp3");
+
+					
+		//forhighscore
+		let playersName = [];
+		let playersDuration = [];
+
+
+		// IIFE - Runs when page opened
+		(function(){
+			getLocalStorage();
+			populateHomeTableWithColumns();
+			populateEnemyTableWithColumns();
+			populateArrayOfComputerColumnRandomly();
+		}())
+
+		//Start duration as highscore in the end of the game
+		function startTimer(){
+			setInterval(function(){
+				duration++;
+			},1000)
+		}
+
+		function getLocalStorage(){
+			let objStr = localStorage.getItem("players");
+			if(objStr != null){
+				let obj = JSON.parse(objStr);
+				for(let i=0; i<obj.length; i++){
+					playersName.push(obj[i].name);
+					playersDuration.push(obj[i].duration);
+				}
+			}
+		}
+
+		function gameEnded(flag){
+			minutes = Math.floor(duration / 60);
+			seconds = duration - minutes * 60;
+			
+			let state = flag? "win" : "lost";
+
+			addToLcalStorage();
+			
+			clearInterval(t);
+			swal(
+				'Game Finished',
+				'You ' + state + ' the game with' + 
+				 minutes + " minutes : " + seconds + " seconds",
+				 'success'
+			).then(function(){
+				setTimeout(function(){
+					window.location = "/index.html";
+				},1000)
+			})
+		}
+
+		function addToLcalStorage(){
+			/* Result: Array of object
+			let players = [
+				{
+					name : "kemal",
+					duration : 20
+				},
+				{
+					name : "kemal",
+					duration : 20
+				}
+			]
+			*/
+			
+			playersName.push(localStorage.getItem("Name"));
+			playersDuration.push(duration);
+
+			let players = [];
+			for(let i=0; i<playersName.length; i++){
+				let player = {
+					name : playersName[i],
+					duration : playersDuration[i]
+				}
+				players.push(player);
+			}
+
+			let playersString = JSON.stringify(players);
+			localStorage.setItem("players", playersString);
+		}
+
+		// Iterating to popoulate USER Table Columns (on Web Start)
+		function populateHomeTableWithColumns(){
+			let oneRow = "";
+			let td = "";
+
+			let index = 1; //index ini untuk ditambahkan pada nama class tiap column agar masing2 berbeda nama classny
+
+			for(var i = 0; i<10; i++){
+				oneRow = "<tr>";
+
+				for(var j = 0; j<10; j++){
+					td += "<td class='column" + index + "'> </td>";
+					index++; 
+				}
+
+			oneRow += td + "</tr>";
+			homeTable.append(oneRow);
+			td = ""; 
+			}
+		}
+
+		//Iterating to populate ENEMY Table Columns
+		function populateEnemyTableWithColumns(){
+			let oneRow = "";
+			let td = "";
+
+			let index = 1;
+			for(var i = 0; i<10; i++){
+				oneRow = "<tr>";
+
+				for(var j = 0; j<10; j++){
+					td+= "<td class='columnE" + index + "'> </td>";
+					index++;
+				}
+			
+				oneRow += td + "</tr>"
+				enemyTable.append(oneRow);
+				td = "";
+			}
+			enemyTable.hide();
+		}
+
+		//Function to populate ArrayofComputerColumn Randomly 
+		function populateArrayOfComputerColumnRandomly(){
+			for(let i=0; i<5; i++){
+			
+				let randomNum = Math.floor(Math.random()*100)+1; //random number
+
+				if(arrayOfComputerColumn.includes(randomNum)){
+					while(arrayOfComputerColumn.includes(randomNum)){
+						randomNum = Math.floor(Math.random()*100)+1;				
+					}
+					arrayOfComputerColumn.push(randomNum);
+				}else{
+					arrayOfComputerColumn.push(randomNum);
+				}
+			}
+			console.log(arrayOfComputerColumn);
+		}
+
+		chbShip1.change(function(){
+			if (chbShip1.is(':checked')){				
+				swal("Please Place the First Ship");
+				startTimer(); 
+			}
+			chbShip1.attr("disabled","true");
+			userOnPlaceBoat = true;
+		});
+		chbShip2.change(function(){
+			if (chbShip2.is(':checked')){
+				swal("Please Place the Second Ship");
+				
+			}
+			chbShip2.attr("disabled","true");
+			userOnPlaceBoat = true;
+		});
+		chbShip3.change(function(){
+			if (chbShip3.is(':checked')){
+				swal("Please Place the Third Ship");
+				
+			}
+			chbShip3.attr("disabled","true");
+			userOnPlaceBoat = true;
+		});
+		chbShip4.change(function(){
+			if (chbShip4.is(':checked')){
+				swal("Please Place the Fouth Ship");
+
+			}
+			chbShip4.attr("disabled","true");
+			userOnPlaceBoat = true;
+		});
+		chbShip5.change(function(){
+			if (chbShip5.is(':checked')){
+				swal("Please Place the Fifth Ship");
+			}
+			chbShip5.attr("disabled","true");
+			userOnPlaceBoat = true;
+		})
+
+
+		$('*[class^=column]').click(function(){
+			// alert("Aku berhasil diklik");
+			if(userOnPlaceBoat){ //masuk jika nilainya TRUE
+				userPlaceBoat(this.className);
+			}
+			else if(userTryToDestroy){ 
+				userDestroyEnemy(this.className);
+			}
+			else if(arrayOfUserColumn.length == 5){ 
+				swal("Now Press Destroy Enemy Button!");
+				btnTryToDestroyComputer.removeAttr("disabled");
+			}
+			else{
+				swal("Please select ship");
+			}
+		})
+
+		function userPlaceBoat(column){	
+			let colNum = parseInt(column.replace(/\D+/g, '')); //untuk mengambil angka saja dan diubah dgn ParseInt
+
+			if(arrayOfUserColumn.includes(colNum)){
+				swal("ColNum is same");
+			}else{
+				if(arrayOfUserColumn.length < 5){
+						
+					arrayOfUserColumn.push(colNum);
+
+					$("."+column).css("background","url('asset/selected.png')").css("background-position","center").css("backgorund-repeat","no-repeat");
+					userOnPlaceBoat = false;
+					$(".chbShip" + parseInt(arrayOfUserColumn.length + 1)).removeAttr("disabled");
+				}
+			}
+		}
+
+		btnTryToDestroyComputer.click(function(){
+			swal("Destroy the Enemy!");
+			userTryToDestroy = true;
+			homeTable.fadeOut(1000);
+			listOfCheckbox.fadeOut(1000);
+			enemyTable.delay(1000).fadeIn(1000);
+		});
+
+		function userDestroyEnemy(column){
+			let colNum = parseInt(column.replace(/\D+/g, ''));
+			
+			if(arrayOfUserAttempToDestroyComputerColNum.includes(colNum)){
+					swal("Sudah dipilih");
+			}else{
+				if(numOfUserAttempToDestroyComputer < 5){
+					if(arrayOfComputerColumn.includes(colNum)){
+						$("."+column).css("background","url('asset/exploded.png')").css("background-position","center").css("backgorund-repeat","no-repeat");
+						audioBomb.play();
+						userColNumMatchComputerColNum++;
+						if(userColNumMatchComputerColNum == 5) userWinGame(); 
+					}else{
+						$("."+column).css("background","url('asset/notExplode.png')").css("background-position","center").css("backgorund-repeat","no-repeat");
+						audioSplash.play();
+					}
+					numOfUserAttempToDestroyComputer++;
+					arrayOfUserAttempToDestroyComputerColNum.push(colNum);
+					//swal(5 - numOfUserAttempToDestroyComputer);
+				}else{
+					swal("Selesai Menyerang");
+					computerTryToDestroyUser();
+					numOfUserAttempToDestroyComputer = 0;
+				}
+			}
+		
+		}
+
+		function computerTryToDestroyUser(){
+			
+			enemyTable.fadeOut(1000);
+			homeTable.delay(1000).fadeIn(1000);
+			//listOfCheckbox.delay(1000).fadeIn(1000);
+			
+			let i = 0;
+
+			t = setInterval(function(){
+				getRandomColumnAroundSelectedColumn(arrayOfUserColumn[i]);
+				i++;
+				
+				if(i==5) {clearInterval(t); 
+							alert("SELESAI");
+							homeTable.delay(1000).fadeOut(1000);
+							enemyTable.delay(1000).fadeIn(1000);
+							
+						}
+			},2000);
+
+		}
+
+		function getRandomColumnAroundSelectedColumn(colNum){
+			switch (getWhereUserTapped(colNum)){
+				case 0: populateArrayTopSelected(colNum);
+					break;
+				case 1: populateArrayRightSelected(colNum);
+					break;
+				case 2: populateArrayBottomSelected(colNum);
+					break;
+				case 3:	populateArrayLeftSelected(colNum);
+					break;
+				case 4:	populateArrayTopLeftSelected(colNum);
+					break;
+				case 5:	populateArrayTopRightSelected(colNum);
+					break;
+				case 6: populateArrayBottomRightSelected(colNum);
+					break;
+				case 7: popoulateArrayBottomLeftSelected(colNum);
+					break; 
+				case 8: populateArrayCenterSelected(colNum);
+					break;
+				default: break;
+			}
+		}
+
+		function getWhereUserTapped(colNum){
+			let arrayTopCorner = [2, 3, 4, 5, 6, 7, 8, 9]; 
+			let arrayRightCorner = [20, 30, 40, 50, 60, 70, 80, 90];
+			let arrayBottomCorner = [92, 93, 94, 95, 96, 97, 98, 99];
+			let arrayLeftCorner = [11, 21, 31, 41, 51, 61, 71, 81, 91];
+			let topLeftCorner = 1;
+			let topRightCorner = 10;
+			let bottomRightCorner = 100;
+			let bottomLeftCorner = 91;
+
+			if(arrayTopCorner.includes(colNum)) return 0;
+			else if(arrayRightCorner.includes(colNum)) return 1;
+			else if(arrayBottomCorner.includes(colNum)) return 2;
+			else if(arrayLeftCorner.includes(colNum)) return 3;
+			else if(colNum == topLeftCorner) return 4;
+			else if(colNum == topRightCorner) return 5;
+			else if(colNum == bottomRightCorner) return 6;
+			else if(colNum == bottomLeftCorner) return 7;
+			else return 8;
+		}
+
+		// Buat 9 Function
+		function populateArrayCenterSelected(colNum){
+			let arrayAroundSelectedColumn = [colNum-11, 
+											colNum-10,
+											colNum-9,
+											colNum-1,
+											colNum,
+											colNum+1,
+											colNum+9,
+											colNum+10,
+											colNum+11];
+		
+
+			//bikin variable utk Angka Random sepanjang arrayAroundSelectedColumn.length, gaboleh sama randNum
+			let randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+
+			if(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+				while(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+					randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+				}
+				arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+			}else{
+				arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+			}
+			ComputerSelectColumn(arrayAroundSelectedColumn[randNum]);
+		}
+
+
+		function populateArrayTopSelected(colNum){
+			let arrayAroundSelectedColumn = [colNum-1,
+											colNum,
+											colNum+1,
+											colNum+9,
+											colNum+10,
+											colNum+11];
+
+			let randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+											
+			if(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+				while(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[rand])){
+					randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+				}
+				arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+			}else{
+				arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+			}
+			ComputerSelectColumn(arrayAroundSelectedColumn[randNum]);
+		}
+
+		function populateArrayRightSelected(colNum){
+			let arrayAroundSelectedColumn = [colNum-11,
+											colNum-10,
+											colNum-1,
+											colNum,
+											colNum+9,
+											colNum+10];
+			
+			let randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+											
+			if(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+				while(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+					randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+				}
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}else{
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}
+				ComputerSelectColumn(arrayAroundSelectedColumn[randNum]);
+		}
+
+		function populateArrayBottomSelected(colNum){
+			let arrayAroundSelectedColumn = [colNum-11,
+											colNum-10,
+											colNum-9,
+											colNum-1,
+											colNum,
+											colNum+1];
+			
+			let randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+											
+			if(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+				while(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+					randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+				}
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}else{
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}
+			ComputerSelectColumn(arrayAroundSelectedColumn[randNum]);
+		}
+
+		function populateArrayLeftSelected(colNum){
+			let arrayAroundSelectedColumn = [colNum-10,
+											colNum-9,
+											colNum,
+											colNum+1,
+											colNum+10,
+											colNum+11];
+			
+			let randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+											
+			if(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+				while(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+					randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+				}
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}else{
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}
+			ComputerSelectColumn(arrayAroundSelectedColumn[randNum]);
+		}
+
+		function populateArrayTopLeftSelected(colNum){
+			let arrayAroundSelectedColumn = [colNum,
+											colNum+1,
+											colNum+10,
+											colNum+11];
+			
+			let randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+											
+			if(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+				while(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+					randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+				}
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}else{
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}
+			ComputerSelectColumn(arrayAroundSelectedColumn[randNum]);
+		}
+
+		function populateArrayTopRightSelected(colNum){
+			let arrayAroundSelectedColumn = [colNum-1,
+											colNum,
+											colNum+9,
+											colNum+10];
+
+			let randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+											
+			if(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+				while(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+					randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+				}
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}else{
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}
+			ComputerSelectColumn(arrayAroundSelectedColumn[randNum]);
+		}
+
+		function populateArrayBottomRightSelected(colNum){
+			let arrayAroundSelectedColumn = [colNum-11,
+											colNum-10,
+											colNum-1,
+											colNum];
+			
+			let randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+											
+			if(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+				while(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+					randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+				}
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}else{
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}
+				ComputerSelectColumn(arrayAroundSelectedColumn[randNum]);
+		}
+
+		function popoulateArrayBottomLeftSelected(colNum){
+			let arrayAroundSelectedColumn = [colNum-10,
+											colNum-9,
+											colNum,
+											colNum+1];
+											
+											let randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+											
+			if(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+				while(arrayOfComputerAttempToDestroyUserColNum.includes(arrayAroundSelectedColumn[randNum])){
+					randNum = Math.floor(Math.random()*arrayAroundSelectedColumn.length);
+				}
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}else{
+					arrayOfComputerAttempToDestroyUserColNum.push(arrayAroundSelectedColumn[randNum]);
+				}
+			ComputerSelectColumn(arrayAroundSelectedColumn[randNum]);
+		}
+
+		function ComputerSelectColumn(colNum){
+			let column = ".column" + colNum; // contoh: .column5
+
+			alert(colNum);
+
+				if(arrayOfUserColumn.includes(colNum)){
+					$(column).css("background","url('asset/exploded.png')").css("background-position","center").css("background-repeat","no-repeat");
+					audioBomb.play();
+					computerColNumMatchUserColNum++;
+					if(computerColNumMatchUserColNum == 5) computerWinGame();
+				}else{
+					$(column).css("background","url('asset/notExplode.png')").css("background-position","center").css("background-repeat","no-repeat");
+					audioSplash.play();
+				}
+			}
+		
+		function userWinGame(){
+			gameEnded(true);	
+		}
+
+		function computerWinGame(){
+			gameEnded(false);
+
+		}
+
+
+	</script>
+
+	</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Project PTI (BattleShip)</title>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Special+Elite" rel="stylesheet">
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+</head>
+<style>
+	*{
+    font-family: 'Special Elite', cursive;
+    font-weight: bold;
+}
+body{
+    background: url("asset/background.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+	table, td, th {
+    border-collapse: collapse;
+    border: 2px solid rgba(133, 193, 233, 1);
+}
+td{
+    text-align: center;
+    width: 75px;
+		height: 75px;
+		color: white;
+}
+td:hover{
+	width: 10px;
+}
+</style>
+	<body>
+			<div class="container-fluid">
+					<div class="row">
+						<div class="col-md-12" style="text-align: center">
+								<h1 style="color: white">HighScore</h1>
+								<table class="table table-striped table-hover" style="width:100%;" id="tblHScore">
+										
+								</table>
+						</div>
+					</div>
+			</div>		
+	</body>
+	<script>
+		let tableHScore = $("#tblHScore")
+
+		let players = JSON.parse(localStorage.getItem("players"));
+		if(players != null){
+			let tr = "<tr>";
+			for(let i=0; i<players.length; i++){
+					td = "<tr> <td>" + players[i].name + "</td> <td class ='duration" + i + "'>" + players[i].duration + "</td> </tr>";
+					tr += td
+			}
+			let header = "<tr><td>Name</td><td>Duration</td></tr>"
+			tableHScore.append(header + tr);
+
+			for(let i =0; i<players.length; i++){
+				minutes = Math.floor(players[i].duration / 60);
+				seconds = players[i].duration - minutes * 60;
+
+				$(".duration" + i).html(minutes + " minutes " + seconds + " second");
+			}
+		}else{
+			alert("empty localstorage");
+		}
+	</script>
+</html>
